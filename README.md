@@ -146,7 +146,7 @@ cat README.md  # Template-specific instructions
 To work on this CLI tool itself:
 
 ```bash
-git clone https://github.com/badlogic/creator
+git clone https://github.com/shaneholloman/creator
 cd creator
 npm install
 npx tsx src/cli.ts test-app
