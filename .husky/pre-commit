@@ -8,7 +8,7 @@ npm run check
 
 # If biome or tsc failed, abort the commit
 if [ $? -ne 0 ]; then
-  echo "Pre-commit checks failed. Please fix the errors and try again."
+  echo "✘ Pre-commit checks failed. Please fix the errors and try again."
   exit 1
 fi
 
@@ -19,4 +19,4 @@ for file in $STAGED_FILES; do
   fi
 done
 
-echo "Pre-commit checks passed!"
+echo "✔ Pre-commit checks passed!"

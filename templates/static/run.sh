@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC1083
+# SC1083: Template placeholders {{var}} use literal braces replaced at scaffolding time
 
 set -e
 
@@ -29,7 +31,7 @@ sync_files() {
       --include="package.json" \
       --exclude="*" \
       --delete \
-      ./ $SERVER:$SERVER_DIR/$DOMAIN/
+      ./ "$SERVER:$SERVER_DIR/$DOMAIN/"
 }
 
 pushd "$SCRIPT_DIR" > /dev/null
@@ -49,8 +51,8 @@ dev)
     cleanup() {
         echo -e "\nCleaning up..."
         # Kill the watch process
-        if [ ! -z "$WATCH_PID" ]; then
-            kill $WATCH_PID 2>/dev/null
+        if [ -n "$WATCH_PID" ]; then
+            kill "$WATCH_PID" 2>/dev/null
             echo "Stopped watch process"
         fi
         # Also cleanup any node processes running build.js
@@ -61,27 +63,27 @@ dev)
     # Set trap for cleanup
     trap cleanup INT TERM
 
-    docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up --build --menu=false
+    docker compose -p "$PROJECT" -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up --build --menu=false
 
     # Cleanup after docker-compose exits
     cleanup
     ;;
 prod)
     echo "Starting production server..."
-    docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.prod.yml up -d --build
+    docker compose -p "$PROJECT" -f infra/docker-compose.yml -f infra/docker-compose.prod.yml up -d --build
     ;;
 stop)
     echo "Stopping services..."
-    docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.dev.yml down 2>/dev/null || \
-    docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.prod.yml down
+    docker compose -p "$PROJECT" -f infra/docker-compose.yml -f infra/docker-compose.dev.yml down 2>/dev/null || \
+    docker compose -p "$PROJECT" -f infra/docker-compose.yml -f infra/docker-compose.prod.yml down
     ;;
 logs)
-    docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.dev.yml logs -f 2>/dev/null || \
-    docker compose -p $PROJECT -f infra/docker-compose.yml -f infra/docker-compose.prod.yml logs -f
+    docker compose -p "$PROJECT" -f infra/docker-compose.yml -f infra/docker-compose.dev.yml logs -f 2>/dev/null || \
+    docker compose -p "$PROJECT" -f infra/docker-compose.yml -f infra/docker-compose.prod.yml logs -f
     ;;
 logs-remote)
     echo "Streaming logs from $DOMAIN..."
-    ssh -t $SERVER "cd $SERVER_DIR/$DOMAIN && ./run.sh logs"
+    ssh -t "$SERVER" "cd $SERVER_DIR/$DOMAIN && ./run.sh logs"
     ;;
 deploy)
     echo "Deploying $PROJECT to $DOMAIN..."
@@ -90,14 +92,15 @@ deploy)
     sync_files
 
     echo "Restarting services..."
-    ssh $SERVER "cd $SERVER_DIR/$DOMAIN && ./run.sh stop && ./run.sh prod"
+    # shellcheck disable=SC2029
+    ssh "$SERVER" "cd $SERVER_DIR/$DOMAIN && ./run.sh stop && ./run.sh prod"
 
-    echo "✅ Deployed to https://$DOMAIN"
+    echo "✔ Deployed to https://$DOMAIN"
     ;;
 sync)
     echo "Syncing $PROJECT to $DOMAIN..."
     sync_files
-    echo "✅ Synced to $DOMAIN"
+    echo "✔ Synced to $DOMAIN"
     ;;
 *)
     echo "Usage: $0 {dev|prod|stop|logs|logs-remote|deploy|sync}"

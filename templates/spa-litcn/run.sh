@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC1083
+# SC1083: Template placeholders {{var}} use literal braces replaced at scaffolding time
 
 sync_files() {
     echo "Syncing files to $SERVER..."
@@ -11,7 +13,7 @@ sync_files() {
       --include="package.json" \
       --exclude="*" \
       --delete \
-      ./ $SERVER:$SERVER_DIR/
+      ./ "$SERVER:$SERVER_DIR/"
 }
 
 set -e
@@ -43,8 +45,8 @@ dev)
     # Cleanup function
     cleanup() {
         echo -e "\nStopping development servers..."
-        kill $BACKEND_PID 2>/dev/null || true
-        kill $VITE_PID 2>/dev/null || true
+        kill "$BACKEND_PID" 2>/dev/null || true
+        kill "$VITE_PID" 2>/dev/null || true
         exit 0
     }
 
@@ -65,7 +67,7 @@ build)
     echo "Building backend with TypeScript..."
     npx tsc --project tsconfig.backend.json
 
-    echo "✅ Build complete!"
+    echo "✔ Build complete!"
     ;;
 
 deploy)
@@ -85,9 +87,10 @@ deploy)
     sync_files
 
     echo "Restarting services on remote server..."
-    ssh $SERVER "cd $SERVER_DIR && ./run.sh stop && ./run.sh prod"
+    # shellcheck disable=SC2029
+    ssh "$SERVER" "cd $SERVER_DIR && ./run.sh stop && ./run.sh prod"
 
-    echo "✅ Deployed successfully!"
+    echo "✔ Deployed successfully!"
     ;;
 
 prod)
@@ -106,13 +109,13 @@ logs)
 
 logs-remote)
     echo "Streaming logs from {{domain}}..."
-    ssh -t $SERVER "cd $SERVER_DIR && ./run.sh logs"
+    ssh -t "$SERVER" "cd $SERVER_DIR && ./run.sh logs"
     ;;
 
 sync)
     echo "Syncing to {{domain}}..."
     sync_files
-    echo "✅ Synced to {{domain}}"
+    echo "✔ Synced to {{domain}}"
     ;;
 
 *)
