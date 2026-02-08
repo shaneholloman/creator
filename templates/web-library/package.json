@@ -1,0 +1,28 @@
+{
+  "name": "{{packageName}}",
+  "version": "0.1.0",
+  "description": "{{description}}",
+  "author": "{{author}}",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown src/index.ts --format esm --sourcemap --platform browser && tsc --declaration --emitDeclarationOnly --outDir dist",
+    "dev": "npm run build && npx concurrently \"tsdown src/index.ts --format esm --sourcemap --platform browser --watch\" \"npx @shaneholloman/hotserve --path example:/ --path dist:/dist --port 4000\"",
+    "serve": "npx @shaneholloman/hotserve --path example:/ --path dist:/dist --port 4000",
+    "test": "npx tsx --test --test-concurrency=1 src/**/*.test.ts",
+    "check": "biome check --write src/ && tsc --noEmit",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.14",
+    "@types/node": "^24.10.12",
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "tsdown": "^0.20.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
